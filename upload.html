@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload File</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .message {
+            color: green;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Your File</h1>
+        <form id="uploadForm">
+            <input type="text" id="customer-name" placeholder="Your Name" required>
+            <input type="file" id="file-input" required>
+            <button type="button" onclick="uploadFile()">Upload</button>
+        </form>
+        <p id="success-message" class="message">File uploaded successfully!</p>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js"></script>
+    <script>
+        // Firebase configuration (replace with your config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+
+        // Get shopId from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const shopId = urlParams.get('shopId');
+
+        // Upload file to Firebase Storage
+        window.uploadFile = function () {
+            const fileInput = document.getElementById('file-input');
+            const customerName = document.getElementById('customer-name').value;
+            const file = fileInput.files[0];
+
+            if (!file || !customerName) {
+                alert('Please provide your name and select a file.');
+                return;
+            }
+
+            const storageRef = storage.ref(`uploads/${shopId}/${file.name}`);
+            const metadata = {
+                customMetadata: {
+                    customerName: customerName
+                }
+            };
+
+            // Upload file
+            storageRef.put(file, metadata).then((snapshot) => {
+                console.log('File uploaded successfully');
+                document.getElementById('success-message').style.display = 'block';
+            }).catch((error) => {
+                console.error('Error uploading file:', error);
+            });
+        };
+    </script>
+</body>
+</html>
