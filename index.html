@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xerox Shop | Secure Upload</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Basic CSS for Gmail-like UI */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .dashboard {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: #fff;
+            padding: 20px;
+        }
+        .sidebar h2 {
+            margin-bottom: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-bar {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .file-list li:hover {
+            background: #f9f9f9;
+        }
+        .file-actions button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        .file-actions button:hover {
+            background: #0056b3;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Homepage Section -->
+        <section id="homepage" class="hidden">
+            <h1>Welcome to Secure Xerox Upload</h1>
+            <p>Our website helps Xerox shop owners securely receive customer documents. Shop owners can generate a permanent QR code, which customers can scan to upload their files directly to the shop’s dashboard.</p>
+            <button onclick="showLoginSection()">Login as Xerox Owner</button>
+            <button onclick="showSignupSection()">Sign Up as Xerox Owner</button>
+        </section>
+
+        <!-- Login Section -->
+        <section id="login-section" class="hidden">
+            <h2>Xerox Owner Login</h2>
+            <form id="loginForm">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <button type="button" onclick="login()">Login</button>
+                <button type="button" onclick="goToHomePage()">Back to Homepage</button>
+            </form>
+            <p id="login-message" class="message"></p>
+        </section>
+
+        <!-- Signup Section -->
+        <section id="signup-section" class="hidden">
+            <h2>Xerox Owner Sign Up</h2>
+            <form id="signupForm">
+                <input type="email" id="signup-email" placeholder="Email" required>
+                <input type="password" id="signup-password" placeholder="Password (min 6 characters)" required>
+                <button type="button" onclick="signup()">Sign Up</button>
+                <button type="button" onclick="goToHomePage()">Back to Homepage</button>
+            </form>
+            <p id="signup-message" class="message"></p>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="hidden">
+            <div class="dashboard">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <h2>Dashboard</h2>
+                    <ul>
+                        <li><a href="#">Inbox</a></li>
+                        <li><a href="#">Sent</a></li>
+                        <li><a href="#">Trash</a></li>
+                        <li><a href="#" onclick="showQRCodeSection()">Generate QR Code</a></li>
+                        <li><a href="#" onclick="logout()">Logout</a></li>
+                    </ul>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-content">
+                    <!-- Top Bar -->
+                    <div class="top-bar">
+                        <input type="text" class="search-bar" placeholder="Search files...">
+                        <div class="profile">Welcome, Owner!</div>
+                    </div>
+
+                    <!-- File List -->
+                    <ul class="file-list" id="file-list">
+                        <!-- Files will be dynamically added here -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+<!-- QR Code Section -->
+<section id="qr-section" class="hidden">
+    <h2>Generate Your Shop QR Code</h2>
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <canvas id="qrcode"></canvas>
+    <button onclick="showDashboard()">Back to Dashboard</button>
+</section>
+
+<script>
+    window.generateQRCode = function () {
+        const canvas = document.getElementById('qrcode');
+        const shopId = auth.currentUser.uid; // Get the shop owner's unique ID
+        const uploadPageUrl = `https://yourwebsite.com/upload.html?shopId=${shopId}`; // URL for the upload page
+
+        // Generate QR code
+        QRCode.toCanvas(canvas, uploadPageUrl, { width: 200 }, (error) => {
+            if (error) {
+                console.error('Error generating QR code:', error);
+            } else {
+                console.log('QR code generated successfully');
+            }
+        });
+    };
+</script>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getStorage, ref, listAll, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        // Firebase configuration (replace with your config)
+       const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+
+        // Show/Hide Sections
+        function showSection(sectionId) {
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+        }
+
+        window.showLoginSection = () => showSection('login-section');
+        window.showSignupSection = () => showSection('signup-section');
+        window.showDashboard = () => showSection('dashboard-section');
+        window.showQRCodeSection = () => showSection('qr-section');
+        window.goToHomePage = () => showSection('homepage');
+
+        // Login Function
+        window.login = async function () {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showDashboard();
+                fetchFiles(); // Fetch files after login
+            } catch (error) {
+                document.getElementById('login-message').textContent = error.message;
+            }
+        };
+
+        // Signup Function
+        window.signup = async function () {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                showDashboard();
+                fetchFiles(); // Fetch files after signup
+            } catch (error) {
+                document.getElementById('signup-message').textContent = error.message;
+            }
+        };
+
+        // Logout Function
+        window.logout = function () {
+            signOut(auth).then(() => {
+                showSection('homepage');
+            });
+        };
+
+        // Fetch and Display Files
+        async function fetchFiles() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = ''; // Clear existing list
+
+            const storageRef = ref(storage, 'uploads/');
+            const files = await listAll(storageRef);
+
+            files.items.forEach(async (item) => {
+                const url = await getDownloadURL(item);
+                const metadata = await item.getMetadata();
+
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${metadata.name}</strong><br>
+                        <small>Uploaded on: ${new Date(metadata.timeCreated).toLocaleString()}</small>
+                    </div>
+                    <div class="file-actions">
+                        <button onclick="downloadFile('${url}', '${metadata.name}')">Download</button>
+                        <button onclick="deleteFile('${item.fullPath}')">Delete</button>
+                    </div>
+                `;
+                fileList.appendChild(li);
+            });
+        }
+
+        // Download File
+        window.downloadFile = function (url, name) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = name;
+            link.click();
+        };
+
+        // Delete File
+        window.deleteFile = async function (filePath) {
+            const fileRef = ref(storage, filePath);
+            await deleteObject(fileRef);
+            fetchFiles(); // Refresh the file list
+        };
+
+        // Generate QR Code
+        window.generateQRCode = function () {
+            const canvas = document.getElementById('qrcode');
+            const shopId = auth.currentUser.uid; // Use the user's unique ID as the shop identifier
+            const qrData = `https://yourwebsite.com/upload?shopId=${shopId}`; // Example URL for QR code
+
+            QRCode.toCanvas(canvas, qrData, { width: 200 }, (error) => {
+                if (error) console.error('Error generating QR code:', error);
+            });
+        };
+
+        // Check Auth State
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                showDashboard();
+                fetchFiles();
+            } else {
+                showSection('homepage');
+            }
+        });
+    </script>
+</body>
+</html>
